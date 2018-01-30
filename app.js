@@ -1,4 +1,9 @@
 
+// let form = document.querySelector('#search-form');
+// form.addEventListener('submit', function(e) {
+//     e.preventDefault;
+//     alert('prevented');
+// });
 
 let searchInput = window.location.search;
 
@@ -94,7 +99,7 @@ function showPhotos(photos) {
     var li = document.createElement("li");
     var img = document.createElement("img");
     img.src = photo["url_m"];
-    
+
     ul.appendChild(li);
     li.appendChild(link);
     link.appendChild(img);
