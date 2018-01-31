@@ -1,9 +1,5 @@
 import "./styles/app.scss";
-import { getPromiseDataFromAray } from "./helpers/index";
-
-// let searchInput = window.location.search;
-
-// let searchQuery = searchInput.substring(searchInput.lastIndexOf("=") + 1);
+import { urlEncodeData } from "./helpers";
 
 class Mashed {
   constructor(element) {
@@ -50,25 +46,40 @@ class Mashed {
           console.log("No synonyms for " + query + " found :(");
         }
       })
-      .catch(err => console.error("Error:", err));
+      .catch(err => {
+        let side = document.querySelector(".side");
+        side.innerHTML = "";
+        let searched = document.createElement("h3");
+        searched.classList.add("aside-heading");
+        searched.innerHTML = "Search was made for: " + query.toUpperCase();
+        let p = document.createElement("p");
+        p.innerHTML = "Word and/or synonyms not found :(";
+
+        side.appendChild(searched);
+        side.appendChild(p);
+      });
   }
 
   getPhotos(query, callback) {
-    //sort = relevance, text, licence 2,3,4,5,6,9, parse_tags = 1, per_page: 10
     let flickrKey = process.env.FLICKR_API_KEY;
     let flickrSecret = process.env.FLICKR_SECRET;
-    let flickrQuery =
-      "&per_page=10" +
-      "&sort=relevance" +
-      "&text=" +
-      query +
-      "&tags=" +
-      query +
-      "&safe_search=1&extras=url_m&format=json&nojsoncallback=1";
     let flickrSourceUrl =
       "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=";
+
+    let flickrQueryParams = {
+      per_page: 10,
+      sort: 'relevance',
+      text: query,
+      tags: query,
+      safe_search: 1,
+      extras: 'url_m',
+      format: 'json',
+      nojsoncallback: 1
+    }
+
+    let params = urlEncodeData(flickrQueryParams);
     
-    let flickUrl = flickrSourceUrl + flickrKey + flickrQuery;
+    let flickUrl = flickrSourceUrl + flickrKey + '&' + params;
 
     return fetch(flickUrl, {})
       .then(res => res.json())
@@ -81,6 +92,7 @@ class Mashed {
   }
 
   synonym(query, words) {
+    
     let side = document.querySelector(".side");
     side.innerHTML = "";
 
@@ -135,6 +147,7 @@ class Mashed {
       link.appendChild(img);
     });
   }
+
 }
 
 (function() {
