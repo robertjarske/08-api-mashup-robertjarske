@@ -2,70 +2,88 @@
 import './styles/app.scss';
 import { getPromiseDataFromAray } from './helpers/index';
 
-let searchInput = window.location.search;
+  // let searchInput = window.location.search;
+  
+  // let searchQuery = searchInput.substring(searchInput.lastIndexOf("=") + 1);
 
-let searchQuery = searchInput.substring(searchInput.lastIndexOf("=") + 1);
+  class Mashed {
+    constructor(element) {
+      this.root = element;
+      
+      this.search = this.search.bind(this);
 
-window.on.load= init();
+      document.querySelector('.search button').on('click', this.search);
+      
+      this.input = document.querySelector('.search input');
+    }
 
-function init() {
+  search() {
+    let searchValue = this.input.value;
+    this.getWords(searchValue);
+    this.getPhotos(searchValue);
+    
+    this.input.value = "";
+  }
 
 
-  function getWords(query, callback) {
+
+  getWords(query, callback) {
     let bhtSourceUrl = "http://words.bighugelabs.com/api/2/";
     let bigHugeLabsKey = process.env.BHT_API_KEY;
     let format = "/json";
-    let bhtUrl = bhtSourceUrl + bigHugeLabsKey + '/' + searchQuery + format;
+    let bhtUrl = bhtSourceUrl + bigHugeLabsKey + '/' + query + format;
 
     return fetch(bhtUrl, {
-      method: "GET"
     })
       .then(res => res.json())
-      .catch(err => console.error("Error:", err))
       .then(res => {
-        getPhotos(searchQuery);
-      
-
         if (res["noun"]) {
           let words = res["noun"]["syn"];
-          synonym(searchQuery, words);
+          console.log(words);
+          this.synonym(query, words);
         } else if (res["verb"]) {
           let words = res["verb"]["syn"];
-          synonym(searchQuery, words);
+          console.log(words);
+          this.synonym(query, words);
         } else if (res["adjective"]) {
           let words = res["adjective"]["syn"];
-          synonym(searchQuery, words);
+          console.log(words);
+          this.synonym(query, words);
         } else {
-          console.log("No synonyms for " + searchQuery + " found :(");
+          console.log("No synonyms for " + query + " found :(");
         }
-      });
+      })
+      .catch(err => console.error("Error:", err));
   }
 
-  function getPhotos(word, callback) {
+  getPhotos(query, callback) {
       //sort = relevance, text, licence 2,3,4,5,6,9, parse_tags = 1, per_page: 10
     let flickrKey = process.env.FLICKR_API_KEY;
     let flickrSecret = process.env.FLICKR_SECRET;
-    let flickrQuery = "&tags=" + word + "&safe_search=1&extras=url_m&format=json&nojsoncallback=1";
+    let flickrQuery = "&tags=" + query + "&safe_search=1&extras=url_m&format=json&nojsoncallback=1";
     let flickrSourceUrl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=";
     let flickUrl = flickrSourceUrl + flickrKey + flickrQuery;
 
     return fetch(flickUrl, {
-      method: "GET"
     })
       .then(res => res.json())
-      .catch(err => console.error("Error:", err))
       .then(res => {
+        console.log(res);
         let photos = res["photos"]["photo"];
         //send photos to showPhotos() do the loop...boogie!
-        showPhotos(photos);
-      });
+        this.showPhotos(photos);
+      })
+      .catch(err => console.error("Error:", err));
   }
 
-  function synonym(searchQuery, words) {
-    const holder = document.querySelector(".results");
+  synonym(query, words) {
+    let holder = document.querySelector(".results");
+    holder.innerHTML= "";
 
-    var searched = document.createElement("h3");
-    searched.innerHTML = "Search was made for: " + searchQuery.toUpperCase();
+    let searched = document.createElement("h3");
+    
+    searched.innerHTML = "Search was made for: " + query;
+    
     holder.appendChild(searched);
 
     var ul = document.createElement("ul");
@@ -73,18 +91,24 @@ function init() {
 
     words.forEach(function(word) {
       var link = document.createElement("a");
-      link.href = "?search=" + word;
+      link.href = '#';
       link.classList.add("clickable");
-
+      
       var li = document.createElement("li");
       link.innerHTML = word;
       ul.appendChild(li);
       li.appendChild(link);
     });
-
+    
+    document.querySelectorAll('.clickable').on('click', (e) => {
+      e.preventDefault();
+      let value = e.currentTarget.innerHTML;
+      this.getWords(value);
+      this.getPhotos(value);  
+    });
   }
 
-  function showPhotos(photos) {
+  showPhotos(photos) {
     const holder = document.querySelector(".results");
     var ul = document.createElement("ul");
     holder.appendChild(ul);
@@ -103,25 +127,14 @@ function init() {
       link.appendChild(img);
       
     });
-  }
 
-
-
-  // function search() {
-  //   const searchValue = document.querySelector('.search input').value;
-  //   getWords(searchValue);
     
-  // }
-
-  // document.querySelector('.search button').on('click', search);
-
-
-
-  if (!searchQuery) {
-    searchQuery = "forest";
   }
 
-  getWords(searchQuery);
 
 }
+
+(function() {
+  new Mashed(document.querySelector('#mashed'))
+})();
 
