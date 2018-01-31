@@ -60,7 +60,7 @@ import { getPromiseDataFromAray } from './helpers/index';
       //sort = relevance, text, licence 2,3,4,5,6,9, parse_tags = 1, per_page: 10
     let flickrKey = process.env.FLICKR_API_KEY;
     let flickrSecret = process.env.FLICKR_SECRET;
-    let flickrQuery = "&tags=" + query + "&safe_search=1&extras=url_m&format=json&nojsoncallback=1";
+    let flickrQuery = "&per_page=10" + "&sort=relevance" + "&text=" + query + "&tags=" + query + "&safe_search=1&extras=url_m&format=json&nojsoncallback=1";
     let flickrSourceUrl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=";
     let flickUrl = flickrSourceUrl + flickrKey + flickrQuery;
 
@@ -77,17 +77,17 @@ import { getPromiseDataFromAray } from './helpers/index';
   }
 
   synonym(query, words) {
-    let holder = document.querySelector(".results");
-    holder.innerHTML= "";
+    let side = document.querySelector(".side");
+    side.innerHTML= "";
 
     let searched = document.createElement("h3");
+    searched.classList.add('aside-heading');
+    searched.innerHTML = "Search was made for: " + query.toUpperCase();
     
-    searched.innerHTML = "Search was made for: " + query;
-    
-    holder.appendChild(searched);
+    side.appendChild(searched);
 
     var ul = document.createElement("ul");
-    holder.appendChild(ul);
+    side.appendChild(ul);
 
     words.forEach(function(word) {
       var link = document.createElement("a");
@@ -110,6 +110,7 @@ import { getPromiseDataFromAray } from './helpers/index';
 
   showPhotos(photos) {
     const holder = document.querySelector(".results");
+    holder.innerHTML= "";
     var ul = document.createElement("ul");
     holder.appendChild(ul);
 
