@@ -7,10 +7,26 @@ class Mashed {
     this.root = element;
 
     this.search = this.search.bind(this);
+    
+    this.input = document.querySelector(".search input");
 
+    this.eventListeners();
+
+    this.getPhotos('test');
+
+    
+    
+  }
+  
+  eventListeners() {
+    document.querySelector("#search-input").on("keyup", function(e) {
+      if (e.keyCode === 13) {
+        document.querySelector(".search button").click();
+      }
+    });
+    
     document.querySelector(".search button").on("click", this.search);
 
-    this.input = document.querySelector(".search input");
   }
 
   search() {
@@ -28,7 +44,7 @@ class Mashed {
     //     console.log(result)
     //   });
 
-    this.input.value = "";
+    // this.input.value = "";
   }
 
   getWords(query, callback) {
@@ -37,7 +53,7 @@ class Mashed {
     let format = "/json";
     let bhtUrl = bhtSourceUrl + bigHugeLabsKey + "/" + query + format;
 
-    return fetch(bhtUrl, {})
+    return fetch(bhtUrl)
       .then(res => res.json())
       .then(res => {
         if (res["noun"]) {
@@ -85,7 +101,7 @@ class Mashed {
       text: query,
       tags: query,
       safe_search: 1,
-      extras: 'url_m',
+      extras: 'url_m, owner_name',
       format: 'json',
       nojsoncallback: 1
     }
@@ -94,7 +110,7 @@ class Mashed {
     
     let flickUrl = flickrSourceUrl + params;
 
-    return fetch(flickUrl, {})
+    return fetch(flickUrl)
       .then(res => res.json())
       .then(res => {
         if(res["photos"]["total"] == 0) {
@@ -164,14 +180,21 @@ class Mashed {
 
         photos.forEach(function(photo) {
           var link = document.createElement("a");
-          link.href = photo["url_m"];
-          link.classList.add("clickable");
+          var titleLink = document.createElement("a");
+          
+          titleLink.innerHTML = 'Photo by: ' + photo['ownername'];
+          titleLink.href = 'https://www.flickr.com/photos/' + photo['owner'];
+          titleLink.classList.add("photo-link");
+
+          link.target = '_blank'
+          link.href = 'https://www.flickr.com/photos/' + photo['owner'];
 
           var li = document.createElement("li");
           var img = document.createElement("img");
           img.src = photo["url_m"];
 
           ul.appendChild(li);
+          li.appendChild(titleLink);
           li.appendChild(link);
           link.appendChild(img);
         });
@@ -183,3 +206,26 @@ class Mashed {
 (function() {
   new Mashed(document.querySelector("#mashed"));
 })();
+
+
+
+/*
+let words = Object.keys(data).map(key => {
+  return Object.values(data[key]).map(word => {
+    return word;
+  });
+});
+
+words = flatten(words);
+
+
+
+
+
+
+export function flatten(array) {
+  const flat = [].concat(...array);
+  return flat.some(Array.isArray) ? flatten(flat) : flat;
+}
+
+*/
