@@ -10,35 +10,84 @@ body {
 
 header {
     height: 90px;
+    padding-top: 10px;
     display: flex;
     justify-content: center;
-    background-color: rgba($color: #000000, $alpha: 0.2)
+    background-color: rgba($color: #000000, $alpha: 0.2);
+    border-bottom: 1px solid black;
 }
 
 
 
 .search {
-    margin-top: 10px;
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     border-bottom: 2px solid black;
-    padding-bottom: 10px;
     flex: 1;
 
     button {
-       padding: 10px;
+       padding: 25px;
        background-color: rgba($color: #000000, $alpha: 0.2);
        border-radius: 5px;
+       
     }
 
     
 }
 
+#error {
+    display: none;
+    width: 100%;
+    height: 50px;
+    padding-top: 10px;
+    background-color: hsla(0, 100%, 50%, 0.507);
+    text-align: center;
+}
 .main-content {
     display: flex;
+
     
     .results {
         flex: 8;
+        height: auto;
+
+        ul {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            li {
+                width: 100%;
+                height: 350px;
+                background-repeat: no-repeat;
+                background-position: center center;
+                background-size: cover;
+                border-bottom: 8px solid #000;
+                display: flex;
+
+                .owner-link {
+                    position: absolute;
+                    width: 30%;
+                    height: auto;
+                    border-radius: 5px;
+                    padding-top: 10px;
+                    padding-bottom: 10px;
+                    text-align: center;
+                    color: #FFF;
+                    background: rgba($color: #000000, $alpha: 0.4)
+                    
+                    
+                }
+
+                .photo-link {
+                    margin-top: 300px;
+                    padding-top: 10px;
+                    text-align: center;
+                    width: 100%;
+                    color: #FFF;
+                    background: rgba($color: #000000, $alpha: 0.4);
+                }
+            }
+        }
 
         .no-photo-p {
             margin-left: 20px;
@@ -48,29 +97,8 @@ header {
             margin-top: 20px;
             margin-left: 20px;
         }
-
-        .photo-link {
-            position: absolute;
-            width: 49%;
-            height: 50px;
-            margin-left: 30px;
-            text-align: center;
-            color: #FFF;
-            background: rgba($color: #000000, $alpha: 0.4)
-            
-            
-        }
         
-
-        ul>li>a>img {
-            width: 75%;
-            margin: 30px;
-        }
         
-        ul>li {
-        border-bottom: 2px solid black;
-        
-        }
     }
 
     .side {
@@ -80,12 +108,12 @@ header {
 
         ul>li {
             margin: 10px;
-        }
 
-        .aside-heading {
-            margin-bottom: 10px;
+            &:hover {
+                cursor: pointer;
+                
+            }
         }
-
         
     }
 }

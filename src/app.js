@@ -1,6 +1,6 @@
 import "./styles/app.scss";
-import { urlEncodeData } from "./helpers";
-import { getPromiseDataFromArray } from "./helpers";
+import { urlEncodeData, getPromiseDataFromArray, flatten } from "./helpers";
+
 
 class Mashed {
   constructor(element) {
@@ -10,41 +10,56 @@ class Mashed {
     
     this.input = document.querySelector(".search input");
 
-    this.eventListeners();
-
-    this.getPhotos('test');
-
-    
+    this.eventListeners();    
     
   }
   
   eventListeners() {
-    document.querySelector("#search-input").on("keyup", function(e) {
+    document.querySelector("#search-input").on("keyup", (e) => {
       if (e.keyCode === 13) {
-        document.querySelector(".search button").click();
+        this.search();
       }
     });
     
     document.querySelector(".search button").on("click", this.search);
 
+    document.querySelectorAll("aside ul").on("click", (event) => {
+      let searchString = event.target.textContent;
+      searchString = searchString ? searchString : searchValue;
+      this.input.value = searchString ? searchString : searchValue;
+      
+      this.search()
+    });
   }
 
-  search() {
+  search(event, searchString = null) {
+
+    let errorContainer = document.querySelector('#error');
+    errorContainer.style.display = 'none';
+
     let searchValue = this.input.value;
-    this.getWords(searchValue);
-    this.getPhotos(searchValue);
+    
+    const isOnlyWhiteSpace = searchValue.match("^\\s*$") ? true : false;
 
-    // let apiCalls = [
-    //   this.getWords(searchValue),
-    //   this.getPhotos(searchValue)
-    // ]
+    if ((!searchValue.length || !searchString), (isOnlyWhiteSpace)) {
+      let error = 'That, my friend, is not a valid search'
+      return this.errorHandler(error);
+    }
+    
+    
+    let apiCalls = [
+      this.getPhotos(searchValue),
+      this.getWords(searchValue),
+    ]
 
-    // getPromiseDataFromArray(apiCalls)
-    //   .then((result) => {
-    //     console.log(result)
-    //   });
-
-    // this.input.value = "";
+    getPromiseDataFromArray(apiCalls)
+      .then((result) => {
+        this.showPhotos(result[0]);
+        this.synonym(result[1]);
+      })
+      .catch((reason) => {
+        this.errorHandler(reason);
+      });
   }
 
   getWords(query, callback) {
@@ -53,38 +68,7 @@ class Mashed {
     let format = "/json";
     let bhtUrl = bhtSourceUrl + bigHugeLabsKey + "/" + query + format;
 
-    return fetch(bhtUrl)
-      .then(res => res.json())
-      .then(res => {
-        if (res["noun"]) {
-          let words = res["noun"]["syn"];
-          this.synonym(query, words);
-
-        } else if (res["verb"]) {
-          let words = res["verb"]["syn"];
-          this.synonym(query, words);
-
-        } else if (res["adjective"]) {
-          let words = res["adjective"]["syn"];
-          this.synonym(query, words);
-
-        } else {
-          console.log("No synonyms for " + query + " found :(");
-        }
-      })
-      .catch(err => {
-        let side = document.querySelector(".side");
-        side.innerHTML = "";
-        let searched = document.createElement("h3");
-        searched.classList.add("aside-heading");
-        searched.innerHTML = "Search was made for: " + query.toUpperCase();
-        let p = document.createElement("p");
-        p.innerHTML = "Word and/or synonyms not found :(";
-
-        side.appendChild(searched);
-        side.appendChild(p);
-        console.log('Error: ', err)
-      });
+    return fetch(bhtUrl);
   }
 
   getPhotos(query, callback) {
@@ -110,61 +94,46 @@ class Mashed {
     
     let flickUrl = flickrSourceUrl + params;
 
-    return fetch(flickUrl)
-      .then(res => res.json())
-      .then(res => {
-        if(res["photos"]["total"] == 0) {
-          let photos = null;
-          this.showPhotos(photos);
-        } else {
-          let photos = res["photos"]["photo"];
-          this.showPhotos(photos);
-        }
-      })
-      .catch(err => console.error("Error:", err));
+    return fetch(flickUrl);
+     
   }
 
-  synonym(query, words) {
+  synonym(data) {
+    
+    let words = Object.keys(data).map(key => {
+      return Object.values(data[key]).map(word => {
+        return word;
+      });
+    });
+    
+    words = flatten(words);
     
     let side = document.querySelector(".side");
-    side.innerHTML = "";
+    
+    let p = document.querySelector("#side-p");
+    p.textContent = "Do another search for:";
 
-    let searched = document.createElement("h3");
-    searched.classList.add("aside-heading");
-    searched.innerHTML = "Search was made for: " + query.toUpperCase();
-    let p = document.createElement("p");
-    p.innerHTML = "Do another search for:";
-
-    side.appendChild(searched);
-    side.appendChild(p);
-
-    var ul = document.createElement("ul");
-    side.appendChild(ul);
+    let frag = document.createDocumentFragment();
 
     words.forEach(function(word) {
-      var link = document.createElement("a");
-      link.href = "#";
-      link.classList.add("clickable");
-
-      var li = document.createElement("li");
-      link.innerHTML = word;
-      ul.appendChild(li);
-      li.appendChild(link);
+      let li = document.createElement("li");
+      li.innerHTML = word;
+      frag.appendChild(li);
     });
+    
+    let ul = document.querySelector('aside ul');
+    ul.innerHTML = ""
+    document.querySelector('aside ul').appendChild(frag);
+    side.insertBefore(p, ul);
 
-    document.querySelectorAll(".clickable").on("click", e => {
-      e.preventDefault();
-      let value = e.currentTarget.innerHTML;
-      this.getWords(value);
-      this.getPhotos(value);
-    });
   }
 
-  showPhotos(photos) {
-    const holder = document.querySelector(".results");
+  showPhotos(data) {
+    let photos = data.photos.photo;
+    let holder = document.querySelector(".results");
     holder.innerHTML = "";
     
-    if(photos == null) {
+    if(!photos.length) {
       let p = document.createElement('p');
       p.classList.add('no-photo-p');
       p.innerHTML = "Oh no! <br> No photos found! <br> Here is a dog picture for you instead:";
@@ -175,30 +144,41 @@ class Mashed {
       holder.appendChild(img);
 
     } else {
-        var ul = document.createElement("ul");
-        holder.appendChild(ul);
+      let ul = document.createElement("ul");
+      holder.appendChild(ul);
 
-        photos.forEach(function(photo) {
-          var link = document.createElement("a");
-          var titleLink = document.createElement("a");
-          
-          titleLink.innerHTML = 'Photo by: ' + photo['ownername'];
-          titleLink.href = 'https://www.flickr.com/photos/' + photo['owner'];
-          titleLink.classList.add("photo-link");
+      let frag = document.createDocumentFragment();
 
-          link.target = '_blank'
-          link.href = 'https://www.flickr.com/photos/' + photo['owner'];
+      photos.forEach(function(photo) {
+        let li = document.createElement("li");
+        li.style.backgroundImage = `url(${photo.url_m})`;
+        
+        let titleLink = document.createElement("a");
+        titleLink.innerHTML = 'Uploaded by: ' + photo.ownername;
+        titleLink.href = `https://www.flickr.com/photos/${photo.owner}`;
+        titleLink.target = '_blank';
+        titleLink.classList.add("owner-link");
 
-          var li = document.createElement("li");
-          var img = document.createElement("img");
-          img.src = photo["url_m"];
+        let link = document.createElement("a");
+        link.target = '_blank'
+        link.classList.add('photo-link');
+        link.href = `https://www.flickr.com/photos/${photo.owner}/${photo.id}`;
+        link.textContent = 'Go to photo @ Flickr';
+        
+        frag.appendChild(li);
+        li.appendChild(titleLink);
+        li.appendChild(link);
+      });
 
-          ul.appendChild(li);
-          li.appendChild(titleLink);
-          li.appendChild(link);
-          link.appendChild(img);
-        });
-      }
+      ul.appendChild(frag);
+
+    }
+  }
+
+  errorHandler(reason) {
+    let errorContainer = document.querySelector('#error');
+    errorContainer.textContent = reason + '. Try again!';
+    errorContainer.style.display = 'block';
   }
 
 }
@@ -206,26 +186,3 @@ class Mashed {
 (function() {
   new Mashed(document.querySelector("#mashed"));
 })();
-
-
-
-/*
-let words = Object.keys(data).map(key => {
-  return Object.values(data[key]).map(word => {
-    return word;
-  });
-});
-
-words = flatten(words);
-
-
-
-
-
-
-export function flatten(array) {
-  const flat = [].concat(...array);
-  return flat.some(Array.isArray) ? flatten(flat) : flat;
-}
-
-*/
