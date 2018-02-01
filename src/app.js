@@ -1,5 +1,6 @@
 import "./styles/app.scss";
 import { urlEncodeData } from "./helpers";
+import { getPromiseDataFromArray } from "./helpers";
 
 class Mashed {
   constructor(element) {
@@ -17,6 +18,16 @@ class Mashed {
     this.getWords(searchValue);
     this.getPhotos(searchValue);
 
+    // let apiCalls = [
+    //   this.getWords(searchValue),
+    //   this.getPhotos(searchValue)
+    // ]
+
+    // getPromiseDataFromArray(apiCalls)
+    //   .then((result) => {
+    //     console.log(result)
+    //   });
+
     this.input.value = "";
   }
 
@@ -29,7 +40,6 @@ class Mashed {
     return fetch(bhtUrl, {})
       .then(res => res.json())
       .then(res => {
-        
         if (res["noun"]) {
           let words = res["noun"]["syn"];
           this.synonym(query, words);
@@ -57,6 +67,7 @@ class Mashed {
 
         side.appendChild(searched);
         side.appendChild(p);
+        console.log('Error: ', err)
       });
   }
 
@@ -64,9 +75,11 @@ class Mashed {
     let flickrKey = process.env.FLICKR_API_KEY;
     let flickrSecret = process.env.FLICKR_SECRET;
     let flickrSourceUrl =
-      "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=";
+      "https://api.flickr.com/services/rest/?";
 
     let flickrQueryParams = {
+      method: 'flickr.photos.search',
+      api_key: flickrKey,
       per_page: 10,
       sort: 'relevance',
       text: query,
@@ -79,14 +92,18 @@ class Mashed {
 
     let params = urlEncodeData(flickrQueryParams);
     
-    let flickUrl = flickrSourceUrl + flickrKey + '&' + params;
+    let flickUrl = flickrSourceUrl + params;
 
     return fetch(flickUrl, {})
       .then(res => res.json())
       .then(res => {
-        let photos = res["photos"]["photo"];
-        //send photos to showPhotos() do the loop...boogie!
-        this.showPhotos(photos);
+        if(res["photos"]["total"] == 0) {
+          let photos = null;
+          this.showPhotos(photos);
+        } else {
+          let photos = res["photos"]["photo"];
+          this.showPhotos(photos);
+        }
       })
       .catch(err => console.error("Error:", err));
   }
@@ -130,22 +147,35 @@ class Mashed {
   showPhotos(photos) {
     const holder = document.querySelector(".results");
     holder.innerHTML = "";
-    var ul = document.createElement("ul");
-    holder.appendChild(ul);
+    
+    if(photos == null) {
+      let p = document.createElement('p');
+      p.classList.add('no-photo-p');
+      p.innerHTML = "Oh no! <br> No photos found! <br> Here is a dog picture for you instead:";
+      let img = document.createElement('img');
+      img.classList.add('no-photo-img');
+      img.src = 'https://loremflickr.com/320/240/dog';
+      holder.appendChild(p);
+      holder.appendChild(img);
 
-    photos.forEach(function(photo) {
-      var link = document.createElement("a");
-      link.href = photo["url_m"];
-      link.classList.add("clickable");
+    } else {
+        var ul = document.createElement("ul");
+        holder.appendChild(ul);
 
-      var li = document.createElement("li");
-      var img = document.createElement("img");
-      img.src = photo["url_m"];
+        photos.forEach(function(photo) {
+          var link = document.createElement("a");
+          link.href = photo["url_m"];
+          link.classList.add("clickable");
 
-      ul.appendChild(li);
-      li.appendChild(link);
-      link.appendChild(img);
-    });
+          var li = document.createElement("li");
+          var img = document.createElement("img");
+          img.src = photo["url_m"];
+
+          ul.appendChild(li);
+          li.appendChild(link);
+          link.appendChild(img);
+        });
+      }
   }
 
 }

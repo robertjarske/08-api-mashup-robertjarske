@@ -38,9 +38,7 @@ module.exports = {
     ],
   },
   plugins: [
-    new DotenvWebpackPlugin({
-        path: './.env'
-    }),
+    new DotenvWebpackPlugin(),
     new CleanWebpackPlugin(['dist']),
     new webpack.optimize.CommonsChunkPlugin({
       names: ['manifest']

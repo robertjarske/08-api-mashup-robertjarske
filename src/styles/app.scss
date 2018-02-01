@@ -1,12 +1,6 @@
-/*
-** <Reset>
-*/
+//Reset
 @import 'reset';
 
-/*
-** <Global Utilities>
-*/
-@import 'utilities/layout';
 
 body {
     font-family: Arial, Helvetica, sans-serif;
@@ -45,6 +39,15 @@ header {
     
     .results {
         flex: 8;
+
+        .no-photo-p {
+            margin-left: 20px;
+        }
+
+        .no-photo-img {
+            margin-top: 20px;
+            margin-left: 20px;
+        }
 
         ul>li>a>img {
             width: 75%;
