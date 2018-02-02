@@ -62,6 +62,7 @@ class Mashed {
       })
       .catch((reason) => {
         this.errorHandler(reason);
+        loader.style.display = 'none';
       });
   }
 
