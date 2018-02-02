@@ -85,6 +85,7 @@ class Mashed {
       text: query,
       tags: query,
       safe_search: 1,
+      license: "2,3,4,5,6,9",
       extras: 'url_m, owner_name',
       format: 'json',
       nojsoncallback: 1
@@ -114,6 +115,7 @@ class Mashed {
     p.textContent = "Do another search for:";
 
     let frag = document.createDocumentFragment();
+    
 
     words.forEach(function(word) {
       let li = document.createElement("li");
