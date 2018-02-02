@@ -135,36 +135,31 @@ class Mashed {
 
   showPhotos(data) {
     let photos = data.photos.photo;
-    // let holder = document.querySelector(".results");
     
+    let container = document.querySelector('.container');
+    
+    let column1 = container.children[0];
+    let column2 = container.children[1];
+    let column3 = container.children[2];
+    let column4 = container.children[3];
+    
+    column1.innerHTML= "";
+    column2.innerHTML= "";
+    column3.innerHTML= "";
+    column4.innerHTML= "";
     
     if(!photos.length) {
       let p = document.createElement('p');
       p.classList.add('no-photo-p');
-      p.innerHTML = "Oh no! <br> No photos found! <br> Here is a dog picture for you instead:";
-      let img = document.createElement('img');
-      img.classList.add('no-photo-img');
-      img.src = 'https://loremflickr.com/320/240/dog';
-      holder.appendChild(p);
-      holder.appendChild(img);
+      p.innerHTML = "Oh no! <br> No photos found! <br> Here is a picture of a dog for you instead:";
+      let item = document.createElement('div');
+      item.classList.add('no-photo-img', 'item2');
+      item.style.backgroundImage = 'url(https://loremflickr.com/320/240/dog)';
+      column2.appendChild(p);
+      column2.appendChild(item);
 
     } else {
-      let container = document.querySelector('.container');
-      // container.classList.add('container');
-      // holder.appendChild(container);
       
-      
-      let column1 = container.children[0];
-      let column2 = container.children[1];
-      let column3 = container.children[2];
-      let column4 = container.children[3];
-      
-      column1.innerHTML= "";
-      column2.innerHTML= "";
-      column3.innerHTML= "";
-      column4.innerHTML= "";
-      
-
       let columnCounter = 0;
       let self = this;
 
