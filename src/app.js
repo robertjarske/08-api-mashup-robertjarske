@@ -149,22 +149,24 @@ class Mashed {
       let container = document.createElement('div');
       container.classList.add('container');
       holder.appendChild(container);
-
-      //Add a number so I can keep track of what pictures I put into wich column
+      
+      
       let column1 = document.createElement('div');
-      column1.classList.add('column1');
+      column1.classList.add('column');
       let column2 = document.createElement('div');
-      column2.classList.add('column2');
+      column2.classList.add('column');
       let column3 = document.createElement('div');
-      column3.classList.add('column3');
+      column3.classList.add('column');
       let column4 = document.createElement('div');
-      column4.classList.add('column4');
+      column4.classList.add('column');
       
       container.appendChild(column1);
       container.appendChild(column2);
       container.appendChild(column3);
       container.appendChild(column4);
+      
 
+      let columnCounter = 0;
       let self = this;
 
       photos.forEach(function(photo) {
@@ -172,7 +174,7 @@ class Mashed {
         let item = document.createElement('div');
         item.classList.add('item' + self.counter, 'contrast');
         
-        let currentColumn = document.querySelector('.column' + self.counter);
+        let currentColumn = container.childNodes[columnCounter];
         currentColumn.appendChild(item);
 
         item.style.backgroundImage = `url(${photo.url_m})`;
@@ -193,22 +195,10 @@ class Mashed {
         item.appendChild(titleLink);
         item.appendChild(link);
         
+        columnCounter >= 3 ? columnCounter = 0 : columnCounter++;
         self.counter >= 4 ? self.counter = 1 : self.counter++;
         
       });
-
-      //Change all the columns to just have column as class
-      column1.classList.remove('column1');
-      column1.classList.add('column');
-      
-      column2.classList.remove('column2');
-      column2.classList.add('column');
-      
-      column3.classList.remove('column3');
-      column3.classList.add('column');
-      
-      column4.classList.remove('column4');
-      column4.classList.add('column');
 
     }
   }
