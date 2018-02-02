@@ -7,7 +7,7 @@ class Mashed {
     this.root = element;
 
     this.search = this.search.bind(this);
-    
+    this.counter = 1;
     this.input = document.querySelector(".search input");
 
     this.eventListeners();    
@@ -23,7 +23,7 @@ class Mashed {
     
     document.querySelector(".search button").on("click", this.search);
 
-    document.querySelectorAll("aside ul").on("click", (event) => {
+    document.querySelectorAll(".side ul").on("click", (event) => {
       let searchString = event.target.textContent;
       searchString = searchString ? searchString : searchValue;
       this.input.value = searchString ? searchString : searchValue;
@@ -80,7 +80,7 @@ class Mashed {
     let flickrQueryParams = {
       method: 'flickr.photos.search',
       api_key: flickrKey,
-      per_page: 10,
+      // per_page: 10,
       sort: 'relevance',
       text: query,
       tags: query,
@@ -110,23 +110,23 @@ class Mashed {
     words = flatten(words);
     
     let side = document.querySelector(".side");
-    
-    let p = document.querySelector("#side-p");
-    p.textContent = "Do another search for:";
 
     let frag = document.createDocumentFragment();
     
 
     words.forEach(function(word) {
+      let firstLetter = word.charAt(0).toUpperCase();
+      let subStr = word.substring(1, word.length);
+      
       let li = document.createElement("li");
-      li.innerHTML = word;
+      li.innerHTML = `${firstLetter + subStr}`;
       frag.appendChild(li);
     });
     
-    let ul = document.querySelector('aside ul');
+    let ul = document.querySelector('.side ul');
     ul.innerHTML = ""
-    document.querySelector('aside ul').appendChild(frag);
-    side.insertBefore(p, ul);
+    document.querySelector('.side ul').appendChild(frag);
+    
 
   }
 
@@ -146,33 +146,69 @@ class Mashed {
       holder.appendChild(img);
 
     } else {
-      let ul = document.createElement("ul");
-      holder.appendChild(ul);
+      let container = document.createElement('div');
+      container.classList.add('container');
+      holder.appendChild(container);
 
-      let frag = document.createDocumentFragment();
+      //Add a number so I can keep track of what pictures I put into wich column
+      let column1 = document.createElement('div');
+      column1.classList.add('column1');
+      let column2 = document.createElement('div');
+      column2.classList.add('column2');
+      let column3 = document.createElement('div');
+      column3.classList.add('column3');
+      let column4 = document.createElement('div');
+      column4.classList.add('column4');
+      
+      container.appendChild(column1);
+      container.appendChild(column2);
+      container.appendChild(column3);
+      container.appendChild(column4);
+
+      let self = this;
 
       photos.forEach(function(photo) {
-        let li = document.createElement("li");
-        li.style.backgroundImage = `url(${photo.url_m})`;
+        
+        let item = document.createElement('div');
+        item.classList.add('item' + self.counter, 'contrast');
+        
+        let currentColumn = document.querySelector('.column' + self.counter);
+        currentColumn.appendChild(item);
+
+        item.style.backgroundImage = `url(${photo.url_m})`;
         
         let titleLink = document.createElement("a");
         titleLink.innerHTML = 'Uploaded by: ' + photo.ownername;
         titleLink.href = `https://www.flickr.com/photos/${photo.owner}`;
         titleLink.target = '_blank';
         titleLink.classList.add("owner-link");
-
+        
         let link = document.createElement("a");
         link.target = '_blank'
         link.classList.add('photo-link');
         link.href = `https://www.flickr.com/photos/${photo.owner}/${photo.id}`;
         link.textContent = 'Go to photo @ Flickr';
         
-        frag.appendChild(li);
-        li.appendChild(titleLink);
-        li.appendChild(link);
+        
+        item.appendChild(titleLink);
+        item.appendChild(link);
+        
+        self.counter >= 4 ? self.counter = 1 : self.counter++;
+        
       });
 
-      ul.appendChild(frag);
+      //Change all the columns to just have column as class
+      column1.classList.remove('column1');
+      column1.classList.add('column');
+      
+      column2.classList.remove('column2');
+      column2.classList.add('column');
+      
+      column3.classList.remove('column3');
+      column3.classList.add('column');
+      
+      column4.classList.remove('column4');
+      column4.classList.add('column');
 
     }
   }
