@@ -46,7 +46,9 @@ class Mashed {
       return this.errorHandler(error);
     }
     
-    
+    let loader = document.querySelector('.loader');
+    loader.style.display = 'block';
+
     let apiCalls = [
       this.getPhotos(searchValue),
       this.getWords(searchValue),
@@ -56,6 +58,7 @@ class Mashed {
       .then((result) => {
         this.showPhotos(result[0]);
         this.synonym(result[1]);
+        loader.style.display = 'none';
       })
       .catch((reason) => {
         this.errorHandler(reason);
@@ -131,8 +134,8 @@ class Mashed {
 
   showPhotos(data) {
     let photos = data.photos.photo;
-    let holder = document.querySelector(".results");
-    holder.innerHTML = "";
+    // let holder = document.querySelector(".results");
+    
     
     if(!photos.length) {
       let p = document.createElement('p');
@@ -145,24 +148,20 @@ class Mashed {
       holder.appendChild(img);
 
     } else {
-      let container = document.createElement('div');
-      container.classList.add('container');
-      holder.appendChild(container);
+      let container = document.querySelector('.container');
+      // container.classList.add('container');
+      // holder.appendChild(container);
       
       
-      let column1 = document.createElement('div');
-      column1.classList.add('column');
-      let column2 = document.createElement('div');
-      column2.classList.add('column');
-      let column3 = document.createElement('div');
-      column3.classList.add('column');
-      let column4 = document.createElement('div');
-      column4.classList.add('column');
+      let column1 = container.children[0];
+      let column2 = container.children[1];
+      let column3 = container.children[2];
+      let column4 = container.children[3];
       
-      container.appendChild(column1);
-      container.appendChild(column2);
-      container.appendChild(column3);
-      container.appendChild(column4);
+      column1.innerHTML= "";
+      column2.innerHTML= "";
+      column3.innerHTML= "";
+      column4.innerHTML= "";
       
 
       let columnCounter = 0;
@@ -173,7 +172,7 @@ class Mashed {
         let item = document.createElement('div');
         item.classList.add('item' + self.counter, 'contrast');
         
-        let currentColumn = container.childNodes[columnCounter];
+        let currentColumn = container.children[columnCounter];
         currentColumn.appendChild(item);
 
         item.style.backgroundImage = `url(${photo.url_m})`;
