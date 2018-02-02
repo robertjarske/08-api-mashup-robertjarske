@@ -80,7 +80,6 @@ class Mashed {
     let flickrQueryParams = {
       method: 'flickr.photos.search',
       api_key: flickrKey,
-      // per_page: 10,
       sort: 'relevance',
       text: query,
       tags: query,
@@ -194,7 +193,7 @@ class Mashed {
         
         item.appendChild(titleLink);
         item.appendChild(link);
-        
+
         columnCounter >= 3 ? columnCounter = 0 : columnCounter++;
         self.counter >= 4 ? self.counter = 1 : self.counter++;
         
